@@ -1,98 +1,96 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import type { StandupSource } from '@/api/client'
+import { ApiError, type ApiClient } from '@/api/client'
+import { buildFakeResult } from '@/test/fakeClient'
 import { createWrapper } from '@/test/utils'
-import type { StandupRequest, StandupResponse } from '@/types'
+import type { StandupRequest, StandupResult } from '@/types'
 import { useStandup } from './useStandup'
 
-const request: StandupRequest = {
-  repo: 'tu-usuario/standup-fm',
-  source: 'ambos',
-  author: null,
-  from: '2026-10-03',
-  to: '2026-10-10',
-  max: 30,
-  tone: 'gracioso',
-  format: 'podcast',
-  duration: 60,
-  language: 'es',
-}
+type Generate = ApiClient['generateStandup']
 
-const response: StandupResponse = {
-  audioUrl: 'blob:audio',
-  durationSec: 60,
-  lines: [{ speaker: 'a', name: 'Tincho', text: 'Hola', startSec: 0 }],
-}
+const request: StandupRequest = { repo: 'acme/demo', language: 'es', maxPrs: 30 }
+const result = buildFakeResult(request)
 
-function setup(generateStandup: StandupSource['generateStandup']) {
+function setup(generateStandup: Generate) {
   return renderHook(() => useStandup(generateStandup), { wrapper: createWrapper() })
 }
 
 describe('useStandup', () => {
   it('arranca vacío', () => {
-    const { result } = setup(vi.fn())
-    expect(result.current.result).toEqual({ status: 'vacio' })
+    const { result: hook } = setup(vi.fn<Generate>())
+    expect(hook.current.result).toEqual({ status: 'vacio' })
   })
 
   it('pasa por cargando y termina en listo con el pedido usado', async () => {
-    let finish: (value: StandupResponse) => void = () => {}
-    const generate = vi.fn<StandupSource['generateStandup']>(
-      () => new Promise((resolve) => (finish = resolve)),
-    )
-    const { result } = setup(generate)
+    let finish: (value: StandupResult) => void = () => {}
+    const generate = vi.fn<Generate>(() => new Promise((resolve) => (finish = resolve)))
+    const { result: hook } = setup(generate)
 
-    act(() => result.current.generate(request))
-    await waitFor(() => expect(result.current.result).toEqual({ status: 'cargando' }))
-    await act(async () => finish(response))
+    act(() => hook.current.generate(request))
+    await waitFor(() => expect(hook.current.result).toEqual({ status: 'cargando' }))
+    await act(async () => finish(result))
     await waitFor(() =>
-      expect(result.current.result).toEqual({ status: 'listo', data: response, request }),
+      expect(hook.current.result).toEqual({ status: 'listo', data: result, request }),
     )
     expect(generate).toHaveBeenCalledWith(request, expect.any(AbortSignal))
   })
 
-  it('una respuesta vacía (204) es sin-resultados', async () => {
-    const { result } = setup(vi.fn().mockResolvedValue(null))
-    act(() => result.current.generate(request))
-    await waitFor(() => expect(result.current.result).toEqual({ status: 'sin-resultados' }))
+  it('un repo sin PRs abiertas es sin-resultados', async () => {
+    const empty: StandupResult = { ...result, totalOpen: 0, prs: [] }
+    const { result: hook } = setup(vi.fn<Generate>().mockResolvedValue(empty))
+    act(() => hook.current.generate(request))
+    await waitFor(() => expect(hook.current.result).toEqual({ status: 'sin-resultados' }))
   })
 
-  it('un fallo es error, y reintentar vuelve a cargar', async () => {
+  it('clasifica el error que manda la API', async () => {
     const generate = vi
-      .fn<StandupSource['generateStandup']>()
+      .fn<Generate>()
+      .mockRejectedValue(new ApiError('repo-no-encontrado', '404', 404))
+    const { result: hook } = setup(generate)
+    act(() => hook.current.generate(request))
+    await waitFor(() =>
+      expect(hook.current.result).toEqual({ status: 'error', kind: 'repo-no-encontrado' }),
+    )
+  })
+
+  it('un error inesperado es desconocido, y reintentar vuelve a cargar', async () => {
+    const generate = vi
+      .fn<Generate>()
       .mockRejectedValueOnce(new Error('boom'))
-      .mockResolvedValueOnce(response)
-    const { result } = setup(generate)
+      .mockResolvedValueOnce(result)
+    const { result: hook } = setup(generate)
 
-    act(() => result.current.generate(request))
-    await waitFor(() => expect(result.current.result).toEqual({ status: 'error' }))
-
-    act(() => result.current.generate(request))
-    await waitFor(() => expect(result.current.result.status).toBe('listo'))
-    expect(generate).toHaveBeenCalledTimes(2)
+    act(() => hook.current.generate(request))
+    await waitFor(() =>
+      expect(hook.current.result).toEqual({ status: 'error', kind: 'desconocido' }),
+    )
+    act(() => hook.current.generate(request))
+    await waitFor(() => expect(hook.current.result.status).toBe('listo'))
   })
 
   it('si se genera dos veces, cancela la primera y gana la última', async () => {
     const signals: AbortSignal[] = []
-    let resolveFirst: (value: StandupResponse) => void = () => {}
-    const generate = vi.fn<StandupSource['generateStandup']>((_req, signal) => {
+    let resolveFirst: (value: StandupResult) => void = () => {}
+    const empty: StandupResult = { ...result, totalOpen: 0, prs: [] }
+    const generate = vi.fn<Generate>((_request, signal) => {
       if (signal) signals.push(signal)
       if (signals.length === 1) {
         return new Promise((resolve) => {
           resolveFirst = resolve
         })
       }
-      return Promise.resolve(null)
+      return Promise.resolve(empty)
     })
-    const { result } = setup(generate)
+    const { result: hook } = setup(generate)
 
-    act(() => result.current.generate(request))
+    act(() => hook.current.generate(request))
     await waitFor(() => expect(generate).toHaveBeenCalledTimes(1))
-    act(() => result.current.generate({ ...request, tone: 'roast' }))
-    await waitFor(() => expect(result.current.result).toEqual({ status: 'sin-resultados' }))
+    act(() => hook.current.generate({ ...request, language: 'en' }))
+    await waitFor(() => expect(hook.current.result).toEqual({ status: 'sin-resultados' }))
 
     expect(signals[0]?.aborted).toBe(true)
     // La primera responde tarde: no debe pisar el resultado de la segunda.
-    await act(async () => resolveFirst(response))
-    expect(result.current.result).toEqual({ status: 'sin-resultados' })
+    await act(async () => resolveFirst(result))
+    expect(hook.current.result).toEqual({ status: 'sin-resultados' })
   })
 })

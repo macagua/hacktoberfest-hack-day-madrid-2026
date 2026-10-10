@@ -1,0 +1,19 @@
+.input {
+  composes: control from '../../../../styles/form.module.css';
+  font-family: var(--font-mono);
+  font-size: 17px;
+  font-weight: 500;
+}
+
+.invalid {
+  border-color: var(--color-accent);
+}
+
+.hint {
+  font-size: 14px;
+  color: var(--color-text-3);
+}
+
+.hintError {
+  color: var(--color-accent);
+}

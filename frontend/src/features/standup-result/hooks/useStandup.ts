@@ -1,7 +1,7 @@
 import { useMutation, type UseMutationResult } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef } from 'react'
-import type { StandupSource } from '@/api/client'
-import type { ResultState, StandupRequest, StandupResponse } from '@/types'
+import { ApiError, type ApiClient } from '@/api/client'
+import type { ResultState, StandupRequest, StandupResult } from '@/types'
 
 export interface UseStandup {
   result: ResultState
@@ -10,10 +10,11 @@ export interface UseStandup {
 
 /**
  * Máquina de estados de la generación: vacio → cargando → listo | error | sin-resultados.
+ * Un repo sin PRs abiertas es «sin-resultados»; los errores llegan clasificados (`ApiError.kind`).
  * Es una mutación (POST). Si se vuelve a generar mientras carga, el pedido anterior se cancela;
  * `useMutation` además refleja solo la última llamada, así que una respuesta vieja nunca pisa a la nueva.
  */
-export function useStandup(generateStandup: StandupSource['generateStandup']): UseStandup {
+export function useStandup(generateStandup: ApiClient['generateStandup']): UseStandup {
   const controllerRef = useRef<AbortController | null>(null)
 
   useEffect(() => () => controllerRef.current?.abort(), [])
@@ -34,21 +35,20 @@ export function useStandup(generateStandup: StandupSource['generateStandup']): U
 }
 
 type MutationSnapshot = Pick<
-  UseMutationResult<StandupResponse | null, Error, StandupRequest>,
-  'status' | 'data' | 'variables'
+  UseMutationResult<StandupResult, Error, StandupRequest>,
+  'status' | 'data' | 'variables' | 'error'
 >
 
-function toResultState({ status, data, variables }: MutationSnapshot): ResultState {
+function toResultState({ status, data, variables, error }: MutationSnapshot): ResultState {
   switch (status) {
     case 'idle':
       return { status: 'vacio' }
     case 'pending':
       return { status: 'cargando' }
     case 'error':
-      return { status: 'error' }
+      return { status: 'error', kind: error instanceof ApiError ? error.kind : 'desconocido' }
     case 'success':
-      return data && variables
-        ? { status: 'listo', data, request: variables }
-        : { status: 'sin-resultados' }
+      if (!data || !variables || data.totalOpen === 0) return { status: 'sin-resultados' }
+      return { status: 'listo', data, request: variables }
   }
 }

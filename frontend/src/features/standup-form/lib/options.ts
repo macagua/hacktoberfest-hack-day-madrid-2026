@@ -1,4 +1,5 @@
 import type { TFunction } from 'i18next'
+import { normalizeRepo } from './repo'
 import type {
   Duration,
   Format,
@@ -21,7 +22,10 @@ export const MAX_MIN = 1
 export const MAX_CAP = 100
 export const DEFAULT_MAX = 30
 export const DEFAULT_RANGE_DAYS = 7
-export const WIDE_RANGE_DAYS = 30
+
+/** Repo precargado: así el primer clic en «Generar standup» ya funciona. */
+export const DEFAULT_REPO =
+  import.meta.env.VITE_DEFAULT_REPO || 'macagua/hacktoberfest-hack-day-madrid-2026'
 
 /**
  * Convierte lo que se escribió en el campo "Máximo" en un número dentro de 1–100.
@@ -49,16 +53,18 @@ export function daysAgo(days: number, now: Date = new Date()): string {
 
 interface DefaultOptionsInput {
   now?: Date
+  repo?: string
   /** Idioma del podcast; por defecto, el de la interfaz. */
   language?: Language
 }
 
 export function createDefaultOptions({
   now = new Date(),
+  repo = DEFAULT_REPO,
   language = 'es',
 }: DefaultOptionsInput = {}): StandupOptions {
   return {
-    repo: null,
+    repo,
     source: 'ambos',
     author: null,
     from: daysAgo(DEFAULT_RANGE_DAYS, now),
@@ -71,30 +77,25 @@ export function createDefaultOptions({
   }
 }
 
-/** Arma el cuerpo del pedido. Devuelve null si todavía no hay repo elegido. */
+/**
+ * Arma el pedido con lo que hoy soporta el backend (repo, idioma y máximo de PRs).
+ * Devuelve null si el repo no tiene un formato válido.
+ */
 export function toRequest(options: StandupOptions): StandupRequest | null {
-  if (!options.repo) return null
+  const repo = normalizeRepo(options.repo)
+  if (!repo) return null
   return {
-    repo: options.repo,
-    source: options.source,
-    author: options.author,
-    from: options.from,
-    to: options.to,
-    max: options.max ?? DEFAULT_MAX,
-    tone: options.tone,
-    format: options.format,
-    duration: options.duration,
+    repo,
     language: options.language,
+    maxPrs: options.max ?? DEFAULT_MAX,
   }
 }
 
-/** Línea de resumen bajo el título del reproductor: "Gracioso · Podcast · 1 min · Español". */
+/** Línea de resumen bajo el título del reproductor: "Español · hasta 30 PRs". */
 export function describeRequest(request: StandupRequest, t: TFunction): string {
   return [
-    t(`options.tone.${request.tone}`),
-    t(`options.format.${request.format}`),
-    t(`options.duration.${request.duration}`),
     t(`options.language.${request.language}`),
+    t('result.player.maxPrs', { count: request.maxPrs }),
   ].join(' · ')
 }
 

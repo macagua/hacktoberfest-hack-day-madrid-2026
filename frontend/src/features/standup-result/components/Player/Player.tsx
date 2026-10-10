@@ -8,6 +8,7 @@ import styles from './Player.module.css'
 interface PlayerProps {
   player: AudioPlayer
   audioUrl: string
+  title: string
   meta: string
   downloadName: string
 }
@@ -21,7 +22,7 @@ const WAVE_HEIGHTS = Array.from(
   (_, j) => `${(16 + 84 * Math.abs(Math.sin(j * 1.7) * Math.cos(j * 0.37 + 1))).toFixed(0)}%`,
 )
 
-export function Player({ player, audioUrl, meta, downloadName }: PlayerProps) {
+export function Player({ player, audioUrl, title, meta, downloadName }: PlayerProps) {
   const { t } = useTranslation()
   const { audioRef, playing, currentTime, duration, toggle, seekBy } = player
   const progress = duration > 0 ? currentTime / duration : 0
@@ -32,7 +33,7 @@ export function Player({ player, audioUrl, meta, downloadName }: PlayerProps) {
 
       <div className={styles.top}>
         <div className={styles.titles}>
-          <div className={styles.title}>{t('result.player.title')}</div>
+          <div className={styles.title}>{title}</div>
           <div className={styles.meta}>{meta}</div>
         </div>
         <a className={styles.download} href={audioUrl} download={downloadName}>

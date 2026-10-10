@@ -34,8 +34,8 @@ describe('opciones por defecto', () => {
   const now = new Date(2026, 9, 10)
 
   it('arrancan con los valores del diseño', () => {
-    expect(createDefaultOptions({ now })).toEqual({
-      repo: null,
+    expect(createDefaultOptions({ now, repo: 'acme/demo' })).toEqual({
+      repo: 'acme/demo',
       source: 'ambos',
       author: null,
       from: '2026-10-03',
@@ -58,31 +58,29 @@ describe('opciones por defecto', () => {
 })
 
 describe('toRequest', () => {
-  it('devuelve null sin repo', () => {
-    expect(toRequest(createDefaultOptions())).toBeNull()
+  it('devuelve null si el repo no tiene formato válido', () => {
+    expect(toRequest({ ...createDefaultOptions(), repo: '' })).toBeNull()
+    expect(toRequest({ ...createDefaultOptions(), repo: 'solo-un-nombre' })).toBeNull()
   })
 
-  it('usa el máximo por defecto si el campo quedó vacío', () => {
-    const request = toRequest({ ...createDefaultOptions(), repo: 'a/b', max: null })
-    expect(request?.max).toBe(30)
-    expect(request?.repo).toBe('a/b')
+  it('normaliza la URL de GitHub a owner/nombre', () => {
+    const request = toRequest({ ...createDefaultOptions(), repo: 'https://github.com/acme/demo' })
+    expect(request?.repo).toBe('acme/demo')
+  })
+
+  it('manda solo lo que soporta el backend, con el máximo por defecto si quedó vacío', () => {
+    const request = toRequest({ ...createDefaultOptions(), repo: 'a/b', max: null, language: 'en' })
+    expect(request).toEqual({ repo: 'a/b', language: 'en', maxPrs: 30 })
   })
 })
 
 describe('describeRequest', () => {
-  it('arma la línea de resumen', () => {
-    const request = toRequest({
-      ...createDefaultOptions(),
-      repo: 'a/b',
-      format: 'futbol',
-      language: 'en',
-    })
-    if (!request) throw new Error('request nulo')
-    expect(describeRequest(request, i18n.getFixedT('es'))).toBe(
-      'Gracioso · Relato de fútbol · 1 min · Inglés',
+  it('arma la línea de resumen en el idioma de la interfaz', () => {
+    expect(describeRequest({ repo: 'a/b', language: 'en', maxPrs: 30 }, i18n.getFixedT('es'))).toBe(
+      'Inglés · hasta 30 PRs',
     )
-    expect(describeRequest(request, i18n.getFixedT('en'))).toBe(
-      'Funny · Football commentary · 1 min · English',
+    expect(describeRequest({ repo: 'a/b', language: 'es', maxPrs: 1 }, i18n.getFixedT('en'))).toBe(
+      'Spanish · up to 1 PR',
     )
   })
 })

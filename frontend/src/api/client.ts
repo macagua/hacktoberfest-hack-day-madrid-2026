@@ -1,44 +1,58 @@
-import { backendGitHub, backendStandup } from './backend'
-import { createDirectGitHub } from './github'
-import {
-  createMockGitHub,
-  createMockStandup,
-  readMockOptionsFromUrl,
-  type MockOptions,
-} from './mock'
-import type { ApiClient } from './types'
+import type { StandupRequest, StandupResult } from '@/types'
+import { parseStandupResponse } from './parse'
+import { ApiError, errorKindFromStatus, type ApiClient } from './types'
 
-export type { ApiClient, GitHubSource, StandupSource } from './types'
-export { HttpError } from './types'
-
-interface ClientEnv {
-  VITE_USE_MOCK?: string
-  VITE_GITHUB_TOKEN?: string
-}
+export { ApiError, type ApiClient } from './types'
 
 /**
- * Elige de dónde sale cada cosa:
- *
- * | Datos de GitHub (usuario, repos, colaboradores) | Generación del standup |
- * | --- | --- |
- * | `VITE_GITHUB_TOKEN` definido → API de GitHub directa | `VITE_USE_MOCK=false` → backend |
- * | si no, mock activo → mock                            | si no → mock                   |
- * | si no → backend                                      |                                |
- *
- * Así se puede probar con repos reales y audio simulado mientras el backend no existe.
+ * Base de la API. En desarrollo es `/api`, que Vite reenvía al backend (ver vite.config.ts).
+ * En producción se define `VITE_API_URL` con la URL pública del backend.
  */
-export function createApiClient(env: ClientEnv, mockOptions: MockOptions = {}): ApiClient {
-  const useMock = env.VITE_USE_MOCK !== 'false'
-  const token = env.VITE_GITHUB_TOKEN?.trim()
+const API_BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '')
 
-  const github = token
-    ? createDirectGitHub(token)
-    : useMock
-      ? createMockGitHub(mockOptions)
-      : backendGitHub
-  const standup = useMock ? createMockStandup(mockOptions) : backendStandup
-
-  return { ...github, ...standup }
+/** Cuerpo de POST /standup tal como lo espera el backend (backend/app/schemas.py). */
+interface StandupRequestBody {
+  repo: string
+  lang: StandupRequest['language']
+  max_prs: number
+  include_audio: boolean
 }
 
-export const apiClient: ApiClient = createApiClient(import.meta.env, readMockOptionsFromUrl())
+function toBody(request: StandupRequest): StandupRequestBody {
+  return {
+    repo: request.repo,
+    lang: request.language,
+    max_prs: request.maxPrs,
+    include_audio: true,
+  }
+}
+
+export function createApiClient(baseUrl: string = API_BASE_URL): ApiClient {
+  return {
+    async generateStandup(request, signal): Promise<StandupResult> {
+      let response: Response
+      try {
+        response = await fetch(`${baseUrl}/standup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(toBody(request)),
+          signal,
+        })
+      } catch (error) {
+        if (signal?.aborted) throw error
+        throw new ApiError('sin-conexion', 'No se pudo conectar con el backend')
+      }
+
+      if (!response.ok) {
+        throw new ApiError(
+          errorKindFromStatus(response.status),
+          `POST /standup respondió ${response.status}`,
+          response.status,
+        )
+      }
+      return parseStandupResponse(await response.json())
+    },
+  }
+}
+
+export const apiClient: ApiClient = createApiClient()

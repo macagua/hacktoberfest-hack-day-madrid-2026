@@ -1,12 +1,29 @@
 import { describe, expect, it } from 'vitest'
 import type { ScriptLine } from '@/types'
-import { formatTime, getActiveLineIndex } from './script'
+import { formatTime, getActiveLineIndex, splitIntoLines } from './script'
 
-const line = (startSec: number): ScriptLine => ({
-  speaker: 'a',
-  name: 'Tincho',
-  text: '…',
-  startSec,
+const line = (startSec: number): ScriptLine => ({ text: '…', startSec })
+
+describe('splitIntoLines', () => {
+  it('parte en frases y reparte el tiempo según la longitud', () => {
+    // 10 + 20 caracteres en 30 s → la segunda empieza a los 10 s.
+    const lines = splitIntoLines('Hola buen. Esto dura el doble ya.', 30)
+    expect(lines.map((l) => l.text)).toEqual(['Hola buen.', 'Esto dura el doble ya.'])
+    expect(lines[0]?.startSec).toBe(0)
+    expect(lines[1]?.startSec).toBeCloseTo(9.4, 1)
+  })
+
+  it('reconoce signos de exclamación, pregunta y puntos suspensivos', () => {
+    expect(splitIntoLines('¡Buenas! ¿Todo bien? Seguimos… Fin.', 10)).toHaveLength(4)
+  })
+
+  it('sin duración conocida deja todo en 0', () => {
+    expect(splitIntoLines('Una. Dos.', 0).map((l) => l.startSec)).toEqual([0, 0])
+  })
+
+  it('con texto vacío no devuelve líneas', () => {
+    expect(splitIntoLines('   ', 30)).toEqual([])
+  })
 })
 
 describe('getActiveLineIndex', () => {
