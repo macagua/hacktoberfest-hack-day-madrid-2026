@@ -1,0 +1,74 @@
+.script {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-2);
+}
+
+.lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.line {
+  --speaker-color: var(--color-accent);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: min(720px, 88%);
+  opacity: 0.6;
+  transition: opacity 0.25s ease;
+}
+
+/* Locutor 1 a la izquierda en acento, locutor 2 a la derecha en ámbar. */
+.speakerA {
+  align-self: flex-start;
+  text-align: left;
+}
+
+.speakerB {
+  --speaker-color: var(--color-secondary);
+  align-self: flex-end;
+  text-align: right;
+}
+
+.name {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--speaker-color);
+}
+
+.bubble {
+  padding: 14px 18px;
+  border-radius: 18px;
+  background: var(--color-panel-raised);
+  border: 2px solid transparent;
+  font-size: clamp(17px, 1.7vw, 21px);
+  line-height: 1.4;
+  text-align: left;
+  text-wrap: pretty;
+}
+
+.active {
+  opacity: 1;
+}
+
+.active .bubble {
+  background: var(--color-panel-border);
+  border-color: var(--speaker-color);
+}

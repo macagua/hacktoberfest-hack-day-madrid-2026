@@ -1,0 +1,42 @@
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-control);
+  background: var(--color-bg);
+  border: 1px solid var(--color-control-border);
+}
+
+.tab {
+  min-height: 46px;
+  border-radius: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.tabOn {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.select {
+  composes: control from '../../../../styles/form.module.css';
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
+  gap: 14px;
+}
+
+.max {
+  composes: control from '../../../../styles/form.module.css';
+  font-family: var(--font-mono);
+  font-size: 18px;
+}

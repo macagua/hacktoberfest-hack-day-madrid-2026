@@ -1,0 +1,135 @@
+.player {
+  background: var(--color-bg);
+  border: 1px solid var(--color-control-border);
+  border-radius: 22px;
+  padding: clamp(18px, 2.6vw, 36px);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.titles {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(18px, 2.2vw, 26px);
+}
+
+.meta {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--color-text-2);
+}
+
+.download {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: 2px solid var(--color-text);
+  background: transparent;
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    transform 0.12s ease,
+    filter 0.12s ease;
+}
+
+.download:hover {
+  color: var(--color-text);
+  filter: brightness(1.12);
+}
+
+.download:active {
+  transform: scale(0.97);
+}
+
+.main {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 2vw, 28px);
+}
+
+.play {
+  flex: none;
+  width: clamp(64px, 8vw, 96px);
+  height: clamp(64px, 8vw, 96px);
+  border-radius: 50%;
+  border: 0;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wave {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: clamp(72px, 10vw, 128px);
+}
+
+.waveBar {
+  flex: 1;
+  min-width: 1px;
+  border-radius: 999px;
+  background: var(--color-control-border-strong);
+}
+
+.wavePlayed {
+  background: var(--color-accent);
+}
+
+.bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.time {
+  font-family: var(--font-mono);
+  font-size: clamp(18px, 2vw, 24px);
+}
+
+.total {
+  color: var(--color-text-3);
+}
+
+.skips {
+  display: flex;
+  gap: 8px;
+}
+
+.skip {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid var(--color-control-border-strong);
+  background: var(--color-panel-raised);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  font-size: 15px;
+}

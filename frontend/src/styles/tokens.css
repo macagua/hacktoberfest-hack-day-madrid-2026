@@ -1,0 +1,36 @@
+:root {
+  /* Superficies */
+  --color-bg: #0c0b10;
+  --color-panel: #15141b;
+  --color-panel-raised: #1c1a24;
+  --color-panel-border: #2a2833;
+  --color-control-border: #3a3745;
+  --color-control-border-strong: #4a4757;
+
+  /* Texto */
+  --color-text: #f3efe6;
+  --color-text-2: #bdb8c7;
+  --color-text-3: #8f8a9c;
+
+  /* Acento (locutor 1, selección, botón principal) */
+  --color-accent: #ff5a36;
+  --color-on-accent: #160704;
+  --color-accent-shadow: #7a1f0c;
+
+  /* Secundario (locutor 2, Aleatorio, foco) */
+  --color-secondary: #ffc857;
+  --color-on-secondary: #1a1203;
+  --color-secondary-soft: #2a2110;
+  --color-secondary-hover: #ffe0a3;
+
+  /* Tipografías */
+  --font-display: 'Unbounded', 'Arial Black', sans-serif;
+  --font-body: 'Instrument Sans', 'Helvetica Neue', sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
+
+  /* Títulos de bloque */
+  --size-h2: clamp(22px, 2.4vw, 30px);
+  --panel-padding: clamp(20px, 2.6vw, 36px);
+  --radius-panel: 24px;
+  --radius-control: 14px;
+}

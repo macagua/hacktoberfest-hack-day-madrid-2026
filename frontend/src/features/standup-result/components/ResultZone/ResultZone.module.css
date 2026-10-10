@@ -1,0 +1,6 @@
+/* Ajustes sobre el Panel base: más aire que los bloques del formulario. */
+.zone {
+  padding: clamp(20px, 3vw, 44px);
+  gap: 28px;
+  scroll-margin-top: 16px;
+}
