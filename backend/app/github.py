@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 
 import httpx
 
-from .schemas import PRInfo
+from .schemas import ContributorSummary, PRInfo, RepoSummary, UserProfile
 
 _FAIL_CONCLUSIONS = {"failure", "timed_out", "cancelled", "action_required", "startup_failure"}
 
@@ -130,3 +130,32 @@ class GitHubClient:
             mergeable_state=detail.get("mergeable_state"),
             requested_reviewers=[u["login"] for u in pr.get("requested_reviewers", [])],
         )
+
+    async def get_user(self) -> UserProfile:
+        data = await self._get("/user")
+        return UserProfile(login=data["login"], avatarUrl=data.get("avatar_url"))
+
+    async def list_user_repos(self, per_page: int = 30) -> list[RepoSummary]:
+        repos = await self._get("/user/repos", params={"sort": "updated", "per_page": per_page})
+        return [
+            RepoSummary(
+                fullName=r["full_name"],
+                description=r.get("description"),
+                defaultBranch=r.get("default_branch", "main"),
+            )
+            for r in repos
+        ]
+
+    async def list_contributors(self, repo: str, per_page: int = 30) -> list[ContributorSummary]:
+        contributors = await self._get(f"/repos/{repo}/contributors", params={"per_page": per_page}, optional=True)
+        if not contributors:
+            return []
+        return [
+            ContributorSummary(
+                login=c["login"],
+                avatarUrl=c.get("avatar_url"),
+                contributions=c.get("contributions", 0),
+            )
+            for c in contributors
+        ]
+
