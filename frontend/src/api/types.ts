@@ -1,30 +1,34 @@
-import type { Contributor, GitHubUser, Repo, StandupRequest, StandupResponse } from '@/types'
+import type { StandupErrorKind, StandupRequest, StandupResult } from '@/types'
 
-/** Todo lo que el front necesita saber de GitHub: quién sos, tus repos y sus colaboradores. */
-export interface GitHubSource {
-  /** Usuario conectado, o null si no hay sesión (401). */
-  getMe(): Promise<GitHubUser | null>
-  getRepos(): Promise<Repo[]>
-  /** `repo` en formato `owner/nombre`. */
-  getContributors(repo: string): Promise<Contributor[]>
-  /** Inicia sesión. Con OAuth real redirige y la promesa nunca resuelve. */
-  login(): Promise<GitHubUser | null>
-  logout(): Promise<void>
+export interface ApiClient {
+  generateStandup(request: StandupRequest, signal?: AbortSignal): Promise<StandupResult>
 }
 
-export interface StandupSource {
-  /** Devuelve null cuando no hubo actividad con esos filtros (204). */
-  generateStandup(request: StandupRequest, signal?: AbortSignal): Promise<StandupResponse | null>
-}
+/** Error de la API ya clasificado para mostrar el mensaje adecuado. */
+export class ApiError extends Error {
+  readonly kind: StandupErrorKind
+  readonly status: number | null
 
-export type ApiClient = GitHubSource & StandupSource
-
-export class HttpError extends Error {
-  readonly status: number
-
-  constructor(status: number, message: string) {
+  constructor(kind: StandupErrorKind, message: string, status: number | null = null) {
     super(message)
-    this.name = 'HttpError'
+    this.name = 'ApiError'
+    this.kind = kind
     this.status = status
+  }
+}
+
+/** Traduce el código HTTP del backend al tipo de error que entiende la interfaz. */
+export function errorKindFromStatus(status: number): StandupErrorKind {
+  switch (status) {
+    case 404:
+      return 'repo-no-encontrado'
+    case 422:
+      return 'repo-invalido'
+    case 429:
+      return 'limite-github'
+    case 502:
+      return 'fallo-github'
+    default:
+      return 'desconocido'
   }
 }

@@ -12,9 +12,10 @@ const ROLL_INTERVAL_MS = 90
 interface RandomButtonProps {
   /** Se llama en cada paso del sorteo; el último valor es el que queda. */
   onRoll: (pick: { tone: Tone; format: Format }) => void
+  disabled?: boolean
 }
 
-export function RandomButton({ onRoll }: RandomButtonProps) {
+export function RandomButton({ onRoll, disabled = false }: RandomButtonProps) {
   const { t } = useTranslation()
   const [rolling, setRolling] = useState(false)
   const timerRef = useRef<number | null>(null)
@@ -42,9 +43,23 @@ export function RandomButton({ onRoll }: RandomButtonProps) {
   }
 
   return (
-    <button type="button" className={styles.button} onClick={roll} aria-busy={rolling}>
-      <DiceIcon className={cx(rolling && styles.rolling)} />
-      <span>{t('style.random')}</span>
-    </button>
+    // El wrapper recibe el hover cuando el botón está desactivado (los disabled no lo reciben).
+    <span
+      className={cx(styles.wrapper, disabled && styles.wrapperDisabled)}
+      title={disabled ? t('soon.tooltip') : undefined}
+      data-tooltip={disabled ? t('soon.tooltip') : undefined}
+    >
+      <button
+        type="button"
+        className={styles.button}
+        onClick={roll}
+        disabled={disabled}
+        aria-busy={rolling}
+        aria-description={disabled ? t('soon.tooltip') : undefined}
+      >
+        <DiceIcon className={cx(rolling && styles.rolling)} />
+        <span>{t('style.random')}</span>
+      </button>
+    </span>
   )
 }

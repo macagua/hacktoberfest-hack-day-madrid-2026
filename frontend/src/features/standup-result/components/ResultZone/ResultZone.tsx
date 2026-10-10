@@ -12,12 +12,13 @@ import styles from './ResultZone.module.css'
 interface ResultZoneProps {
   result: ResultState
   onRetry: () => void
-  onWiden: () => void
+  /** Lleva a la persona al campo de repositorio para probar con otro. */
+  onChangeRepo: () => void
   ref?: Ref<HTMLElement>
 }
 
 /** Bloque 03: muestra el estado de la generación. Anuncia los cambios a lectores de pantalla. */
-export function ResultZone({ result, onRetry, onWiden, ref }: ResultZoneProps) {
+export function ResultZone({ result, onRetry, onChangeRepo, ref }: ResultZoneProps) {
   const { t } = useTranslation()
 
   return (
@@ -33,10 +34,12 @@ export function ResultZone({ result, onRetry, onWiden, ref }: ResultZoneProps) {
       {result.status === 'cargando' && <LoadingState />}
       {result.status === 'listo' && (
         // La key fuerza un reproductor nuevo (tiempo en 0) con cada standup.
-        <ReadyState key={result.data.audioUrl} data={result.data} request={result.request} />
+        <ReadyState key={result.data.generatedAt} data={result.data} request={result.request} />
       )}
-      {result.status === 'error' && <ErrorState onRetry={onRetry} />}
-      {result.status === 'sin-resultados' && <EmptyState onWiden={onWiden} />}
+      {result.status === 'error' && (
+        <ErrorState kind={result.kind} onRetry={onRetry} onChangeRepo={onChangeRepo} />
+      )}
+      {result.status === 'sin-resultados' && <EmptyState onChangeRepo={onChangeRepo} />}
     </Panel>
   )
 }

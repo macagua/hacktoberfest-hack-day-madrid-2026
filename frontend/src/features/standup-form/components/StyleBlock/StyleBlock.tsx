@@ -1,5 +1,6 @@
 import type { ReactElement } from 'react'
 import { useTranslation } from 'react-i18next'
+import { ComingSoon } from '@/components/ComingSoon'
 import { DocumentaryIcon, FootballIcon, NewsIcon, PodcastIcon } from '@/components/icons'
 import { Panel } from '@/components/Panel'
 import { cx } from '@/lib/cx'
@@ -22,7 +23,7 @@ const FORMAT_ICONS: Record<Format, () => ReactElement> = {
   documental: DocumentaryIcon,
 }
 
-/** Bloque 02: tono, formato, duración e idioma del podcast. */
+/** Bloque 02: idioma del podcast; tono, formato y duración quedan para más adelante. */
 export function StyleBlock({ options, onChange }: StyleBlockProps) {
   const { t } = useTranslation()
 
@@ -31,42 +32,50 @@ export function StyleBlock({ options, onChange }: StyleBlockProps) {
       titleId="sfm-como"
       number="02"
       title={t('style.title')}
-      actions={<RandomButton onRoll={onChange} />}
+      actions={<RandomButton onRoll={onChange} disabled />}
     >
       <ChipGroup
-        label={t('style.tone')}
-        values={TONES}
-        selected={options.tone}
-        getLabel={(tone) => t(`options.tone.${tone}`)}
-        onSelect={(tone) => onChange({ tone })}
-        shape="pill"
+        label={t('style.language')}
+        values={LANGUAGES}
+        selected={options.language}
+        getLabel={(language) => t(`options.language.${language}`)}
+        onSelect={(language) => onChange({ language })}
       />
 
-      <div className={form.field}>
-        <span id="sfm-formato-l" className={form.label}>
-          {t('style.format')}
-        </span>
-        <div className={styles.cards} role="group" aria-labelledby="sfm-formato-l">
-          {FORMATS.map((format) => {
-            const on = options.format === format
-            const Icon = FORMAT_ICONS[format]
-            return (
-              <button
-                key={format}
-                type="button"
-                className={cx(styles.card, on && styles.on)}
-                aria-pressed={on}
-                onClick={() => onChange({ format })}
-              >
-                <Icon />
-                <span>{t(`options.format.${format}`)}</span>
-              </button>
-            )
-          })}
-        </div>
-      </div>
+      <ComingSoon>
+        <ChipGroup
+          label={t('style.tone')}
+          values={TONES}
+          selected={options.tone}
+          getLabel={(tone) => t(`options.tone.${tone}`)}
+          onSelect={(tone) => onChange({ tone })}
+          shape="pill"
+        />
 
-      <div className={styles.row}>
+        <div className={form.field}>
+          <span id="sfm-formato-l" className={form.label}>
+            {t('style.format')}
+          </span>
+          <div className={styles.cards} role="group" aria-labelledby="sfm-formato-l">
+            {FORMATS.map((format) => {
+              const on = options.format === format
+              const Icon = FORMAT_ICONS[format]
+              return (
+                <button
+                  key={format}
+                  type="button"
+                  className={cx(styles.card, on && styles.on)}
+                  aria-pressed={on}
+                  onClick={() => onChange({ format })}
+                >
+                  <Icon />
+                  <span>{t(`options.format.${format}`)}</span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
         <ChipGroup
           label={t('style.duration')}
           values={DURATIONS}
@@ -75,14 +84,7 @@ export function StyleBlock({ options, onChange }: StyleBlockProps) {
           onSelect={(duration) => onChange({ duration })}
           mono
         />
-        <ChipGroup
-          label={t('style.language')}
-          values={LANGUAGES}
-          selected={options.language}
-          getLabel={(language) => t(`options.language.${language}`)}
-          onSelect={(language) => onChange({ language })}
-        />
-      </div>
+      </ComingSoon>
     </Panel>
   )
 }

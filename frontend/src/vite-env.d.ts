@@ -1,10 +1,10 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-  /** "false" para hablar con el backend real. Cualquier otro valor (o vacío) usa el mock. */
-  readonly VITE_USE_MOCK?: string
-  /** Token personal de GitHub, solo para desarrollo local. Ver `.env.example`. */
-  readonly VITE_GITHUB_TOKEN?: string
+  /** URL del backend en producción. En desarrollo se usa `/api` con el proxy de Vite. */
+  readonly VITE_API_URL?: string
+  /** Repo que aparece precargado en el formulario. */
+  readonly VITE_DEFAULT_REPO?: string
 }
 
 interface ImportMeta {

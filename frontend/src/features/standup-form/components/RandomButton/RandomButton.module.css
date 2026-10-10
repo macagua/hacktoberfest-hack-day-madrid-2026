@@ -1,3 +1,40 @@
+.wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.wrapperDisabled {
+  cursor: not-allowed;
+}
+
+.wrapperDisabled .button {
+  pointer-events: none;
+}
+
+.wrapperDisabled::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  z-index: 2;
+  width: max-content;
+  max-width: 260px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: var(--color-secondary);
+  color: var(--color-on-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.wrapperDisabled:hover::after {
+  opacity: 1;
+}
+
 .button {
   display: flex;
   align-items: center;
@@ -13,6 +50,13 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+  transform: none;
 }
 
 .rolling {

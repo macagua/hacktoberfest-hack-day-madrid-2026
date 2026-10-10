@@ -1,0 +1,74 @@
+.soon {
+  position: relative;
+  margin: 0;
+  min-width: 0;
+  padding: 18px;
+  border: 1px dashed var(--color-control-border);
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.soon > :not(legend) {
+  opacity: 0.45;
+  /* Los controles desactivados no reciben el ratón: el hover lo toma el fieldset. */
+  pointer-events: none;
+}
+
+.soon:hover {
+  cursor: not-allowed;
+  border-color: var(--color-secondary);
+}
+
+/* Aviso al pasar el ratón: «Próximamente: todavía no lo soporta el backend». */
+.soon::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: -14px;
+  right: 14px;
+  z-index: 2;
+  max-width: min(320px, calc(100% - 28px));
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: var(--color-secondary);
+  color: var(--color-on-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
+  pointer-events: none;
+}
+
+.soon:hover::after {
+  opacity: 1;
+  transform: none;
+}
+
+.legend {
+  padding: 0 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--color-secondary-soft);
+  color: var(--color-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--color-text-3);
+}
