@@ -1,0 +1,32 @@
+/* Estilos comunes de los estados vacío, error y sin resultados. */
+
+.box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: clamp(28px, 6vw, 64px) 12px;
+  text-align: center;
+  border-radius: 18px;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(22px, 3vw, 36px);
+}
+
+.text {
+  margin: 0;
+  color: var(--color-text-2);
+  max-width: 30em;
+}
+
+.action {
+  min-height: 52px;
+  padding: 0 28px;
+  border-radius: var(--radius-control);
+  border: 0;
+  font-size: 17px;
+  font-weight: 700;
+}

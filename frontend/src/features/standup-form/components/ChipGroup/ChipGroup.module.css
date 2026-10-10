@@ -1,0 +1,41 @@
+.group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.groupWide {
+  gap: 10px;
+}
+
+/* Chip sin seleccionar: borde gris y fondo transparente. */
+.chip {
+  min-height: 48px;
+  border: 2px solid var(--color-control-border-strong);
+  background: transparent;
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.pill {
+  padding: 0 22px;
+  border-radius: 999px;
+  font-size: 17px;
+}
+
+.square {
+  padding: 0 18px;
+  border-radius: 12px;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+.on {
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}

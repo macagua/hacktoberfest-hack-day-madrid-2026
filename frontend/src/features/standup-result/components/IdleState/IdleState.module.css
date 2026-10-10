@@ -1,0 +1,17 @@
+.box {
+  composes: box from '../../styles/states.module.css';
+  gap: 10px;
+  padding: clamp(28px, 6vw, 72px) 12px;
+  border: 2px dashed var(--color-control-border);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(20px, 2.6vw, 30px);
+}
+
+.text {
+  composes: text from '../../styles/states.module.css';
+  max-width: 28em;
+}

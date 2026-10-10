@@ -1,0 +1,17 @@
+.ready {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  animation: pop 0.3s ease-out;
+}
+
+@keyframes pop {
+  0% {
+    transform: translateY(6px);
+    opacity: 0;
+  }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}

@@ -1,0 +1,24 @@
+.box {
+  composes: box from '../../styles/states.module.css';
+  border: 2px dashed var(--color-secondary);
+}
+
+.flatline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+}
+
+.flatline span {
+  width: 8px;
+  height: 4px;
+  border-radius: 4px;
+  background: var(--color-secondary);
+}
+
+.widen {
+  composes: action from '../../styles/states.module.css';
+  background: var(--color-secondary);
+  color: var(--color-on-secondary);
+}

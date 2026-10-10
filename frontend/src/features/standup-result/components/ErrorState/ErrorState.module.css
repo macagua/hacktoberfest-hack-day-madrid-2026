@@ -1,0 +1,10 @@
+.box {
+  composes: box from '../../styles/states.module.css';
+  border: 2px solid var(--color-accent);
+}
+
+.retry {
+  composes: action from '../../styles/states.module.css';
+  background: var(--color-text);
+  color: var(--color-bg);
+}

@@ -1,0 +1,27 @@
+.app {
+  min-height: 100vh;
+  background: var(--color-bg);
+  color: var(--color-text);
+  padding: clamp(16px, 4vw, 56px);
+}
+
+.inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(24px, 3vw, 40px);
+}
+
+.blocks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(460px, 100%), 1fr));
+  gap: clamp(16px, 2vw, 28px);
+}
+
+.footer {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-text-3);
+  text-align: center;
+}
