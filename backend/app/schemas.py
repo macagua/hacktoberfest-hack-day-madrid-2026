@@ -5,7 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-_REPO_RE = re.compile(r"^(?:https?://github\.com/)?([\w.-]+)/([\w.-]+?)(?:\.git)?/?$")
+_REPO_RE = re.compile(r"^(?:https?://github\.com/)?([a-zA-Z0-9_\-\.]+)/([a-zA-Z0-9_\-\.]+?)(?:\.git)?/?$")
 
 
 class StandupRequest(BaseModel):
@@ -22,10 +22,16 @@ class StandupRequest(BaseModel):
     @field_validator("repo")
     @classmethod
     def normalize_repo(cls, v: str) -> str:
-        m = _REPO_RE.match(v.strip())
+        cleaned = v.strip()
+        if ".." in cleaned or "\\" in cleaned:
+            raise ValueError("Nombre de repositorio inválido: no se permiten secuencias de escape ni '..'")
+        m = _REPO_RE.match(cleaned)
         if not m:
             raise ValueError("Formato de repo no válido: usa 'owner/name' o la URL de GitHub")
-        return f"{m.group(1)}/{m.group(2)}"
+        owner, name = m.group(1), m.group(2)
+        if owner.startswith(".") or name.startswith("."):
+            raise ValueError("El propietario y el nombre del repositorio no pueden comenzar con punto")
+        return f"{owner}/{name}"
 
 
 PriorityLevel = Literal["alta", "media", "baja"]

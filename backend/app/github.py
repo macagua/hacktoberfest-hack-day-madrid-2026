@@ -87,8 +87,23 @@ class GitHubClient:
             return None  # p. ej. checks sin permisos: seguimos sin ese dato
         if resp.status_code == 404:
             raise GitHubError(404, "Repositorio no encontrado (o privado sin GITHUB_TOKEN con acceso)")
-        if resp.status_code in (403, 429) and resp.headers.get("x-ratelimit-remaining") == "0":
-            raise GitHubError(429, "Límite de peticiones de GitHub agotado; configura GITHUB_TOKEN")
+        if resp.status_code in (403, 429) and (
+            resp.headers.get("x-ratelimit-remaining") == "0"
+            or "rate limit" in resp.text.lower()
+        ):
+            reset_ts = resp.headers.get("x-ratelimit-reset")
+            retry_after = resp.headers.get("retry-after")
+            msg = "Límite de peticiones de GitHub agotado."
+            if retry_after:
+                msg += f" Reintenta en {retry_after} segundos."
+            elif reset_ts:
+                try:
+                    reset_dt = datetime.fromtimestamp(int(reset_ts), tz=timezone.utc)
+                    msg += f" Se restablece a las {reset_dt.strftime('%H:%M:%S UTC')}."
+                except (ValueError, TypeError, OSError):
+                    pass
+            msg += " Configura GITHUB_TOKEN para aumentar la cuota."
+            raise GitHubError(429, msg)
         if resp.status_code == 401:
             raise GitHubError(401, "GITHUB_TOKEN no válido")
         raise GitHubError(502, f"GitHub respondió {resp.status_code} en {path}")
