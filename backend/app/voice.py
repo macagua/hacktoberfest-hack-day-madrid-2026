@@ -20,7 +20,7 @@ def mime_for(output_format: str) -> str:
     return MIME_BY_PREFIX.get(output_format.split("_")[0], "application/octet-stream")
 
 
-async def synthesize(text: str, settings: Settings, lang: str = "es") -> bytes:
+async def synthesize(text: str, settings: Settings, lang: str = "es", voice_id_override: str | None = None) -> bytes:
     if not settings.elevenlabs_api_key:
         raise VoiceError("Falta ELEVENLABS_API_KEY")
     client = AsyncElevenLabs(api_key=settings.elevenlabs_api_key)
@@ -33,7 +33,7 @@ async def synthesize(text: str, settings: Settings, lang: str = "es") -> bytes:
     chunks: list[bytes] = []
     try:
         async for chunk in client.text_to_speech.convert(
-            voice_id=settings.elevenlabs_voice_id,
+            voice_id=voice_id_override or settings.elevenlabs_voice_id,
             text=text,
             model_id=settings.elevenlabs_model_id,
             output_format=settings.elevenlabs_output_format,
@@ -43,3 +43,17 @@ async def synthesize(text: str, settings: Settings, lang: str = "es") -> bytes:
     except Exception as exc:  # el SDK lanza ApiError y errores de red
         raise VoiceError(f"ElevenLabs falló: {exc}") from exc
     return b"".join(chunks)
+
+
+async def transcribe(audio_bytes: bytes, filename: str, content_type: str, settings: Settings) -> str:
+    if not settings.elevenlabs_api_key:
+        raise VoiceError("Falta ELEVENLABS_API_KEY")
+    client = AsyncElevenLabs(api_key=settings.elevenlabs_api_key)
+    try:
+        result = await client.speech_to_text.convert(
+            file=(filename, audio_bytes, content_type),
+            model_id="scribe_v1",
+        )
+    except Exception as exc:
+        raise VoiceError(f"ElevenLabs STT falló: {exc}") from exc
+    return result.text
