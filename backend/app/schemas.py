@@ -84,3 +84,21 @@ class StandupResponse(BaseModel):
     audio_base64: str | None = None
     audio_mime: str | None = None
     audio_error: str | None = None
+
+
+class UserProfile(BaseModel):
+    login: str
+    avatarUrl: str | None = None
+
+
+class RepoSummary(BaseModel):
+    fullName: str
+    description: str | None = None
+    defaultBranch: str = "main"
+
+
+class ContributorSummary(BaseModel):
+    login: str
+    avatarUrl: str | None = None
+    contributions: int = 0
+

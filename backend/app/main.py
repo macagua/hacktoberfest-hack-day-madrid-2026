@@ -10,7 +10,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import Settings, get_settings
 from .github import GitHubClient, GitHubError
 from .priority import build_summary, counts, prioritize
-from .schemas import StandupRequest, StandupResponse
+from .schemas import (
+    ContributorSummary,
+    RepoSummary,
+    StandupRequest,
+    StandupResponse,
+    UserProfile,
+)
 from .voice import VoiceError, mime_for, synthesize
 
 
@@ -44,6 +50,34 @@ async def health(settings: Settings = Depends(get_settings)) -> dict:
         "github_token": bool(settings.github_token),
         "elevenlabs": bool(settings.elevenlabs_api_key),
     }
+
+
+@app.get("/me", response_model=UserProfile)
+async def me(gh: GitHubClient = Depends(get_github)) -> UserProfile:
+    try:
+        return await gh.get_user()
+    except GitHubError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
+
+
+@app.get("/repos", response_model=list[RepoSummary])
+async def list_repos(gh: GitHubClient = Depends(get_github)) -> list[RepoSummary]:
+    try:
+        return await gh.list_user_repos()
+    except GitHubError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
+
+
+@app.get("/repos/{owner}/{repo}/contributors", response_model=list[ContributorSummary])
+async def list_contributors(
+    owner: str,
+    repo: str,
+    gh: GitHubClient = Depends(get_github),
+) -> list[ContributorSummary]:
+    try:
+        return await gh.list_contributors(f"{owner}/{repo}")
+    except GitHubError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
 
 
 @app.post("/standup", response_model=StandupResponse)
