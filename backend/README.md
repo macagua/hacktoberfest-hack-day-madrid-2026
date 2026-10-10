@@ -7,7 +7,6 @@ Lee las pull requests abiertas de un repo de GitHub, las prioriza con reglas exp
 ```bash
 cd backend
 python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
 cp .env.example .env        # y rellena GITHUB_TOKEN y ELEVENLABS_API_KEY
 uvicorn app.main:app --reload --port 8000
 ```

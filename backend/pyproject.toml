@@ -7,7 +7,10 @@ requires-python = ">=3.11"
 dependencies = [
     "fastapi[standard]>=0.143,<1",
     "httpx>=0.28,<1",
+    "uvicorn[standard]>=0.29.0",
     "elevenlabs>=2.71,<3",
+    "python-dotenv>=1.0.0",
+    "python-multipart==0.0.32",
 ]
 
 [dependency-groups]
