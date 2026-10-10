@@ -18,6 +18,9 @@ class StandupRequest(BaseModel):
     max_prs: int = Field(30, ge=1, le=100, description="Máximo de PRs abiertas a analizar")
     spoken_top: int = Field(5, ge=1, le=10, description="Cuántas PRs se mencionan en el audio")
     include_audio: bool = True
+    tone: Literal["serio", "gracioso", "roast"] = "serio"
+    format: Literal["podcast", "noticiero", "futbol", "documental"] = "podcast"
+
 
     @field_validator("repo")
     @classmethod

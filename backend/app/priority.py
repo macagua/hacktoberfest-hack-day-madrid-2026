@@ -159,7 +159,46 @@ def counts(ranked: list[PrioritizedPR]) -> dict[str, int]:
     return {"alta": c["alta"], "media": c["media"], "baja": c["baja"], **{k: v for k, v in s.items()}}
 
 
-def build_summary(repo: str, ranked: list[PrioritizedPR], lang: str = "es", spoken_top: int = 5) -> str:
+FORMAT_STYLES = {
+    "es": {
+        "futbol": {
+            "intro": "¡Arranca la jornada en el estadio {repo}! El árbitro da inicio a la revisión.",
+            "outro": "¡Final del partido! A dejarlo todo en la cancha.",
+        },
+        "noticiero": {
+            "intro": "Edición especial de última hora desde la redacción de {repo}.",
+            "outro": "Seguiremos informando. Adelante estudios.",
+        },
+        "roast": {
+            "intro": "Atención equipo de {repo}: hora de ventilar los trapitos al sol.",
+            "outro": "Vayan a arreglarlo antes de que arda producción.",
+        },
+    },
+    "en": {
+        "futbol": {
+            "intro": "Kick-off at {repo} stadium! The whistle blows for today's stand-up review.",
+            "outro": "Full time! Leave it all on the pitch.",
+        },
+        "noticiero": {
+            "intro": "Breaking news edition reporting live from the {repo} newsroom.",
+            "outro": "Back to the studio.",
+        },
+        "roast": {
+            "intro": "Listen up {repo} team: time to face the music and review this code.",
+            "outro": "Go fix it before production melts.",
+        },
+    },
+}
+
+
+def build_summary(
+    repo: str,
+    ranked: list[PrioritizedPR],
+    lang: str = "es",
+    spoken_top: int = 5,
+    tone: str = "serio",
+    format_style: str = "podcast",
+) -> str:
     """Texto pensado para ser escuchado: frases cortas, sin URLs ni símbolos."""
     t = T[lang]
     repo_spoken = repo.split("/")[-1].replace("-", " ").replace("_", " ")
@@ -167,7 +206,15 @@ def build_summary(repo: str, ranked: list[PrioritizedPR], lang: str = "es", spok
         return t["intro_none"].format(repo=repo_spoken)
 
     c = counts(ranked)
-    parts = [t["intro"].format(repo=repo_spoken, total=len(ranked), high=c["alta"], mid=c["media"], low=c["baja"])]
+    styles = FORMAT_STYLES.get(lang, {})
+    custom = styles.get(tone) or styles.get(format_style)
+
+    if custom:
+        intro_text = f"{custom['intro'].format(repo=repo_spoken)} {t['intro'].format(repo=repo_spoken, total=len(ranked), high=c['alta'], mid=c['media'], low=c['baja'])}"
+    else:
+        intro_text = t["intro"].format(repo=repo_spoken, total=len(ranked), high=c["alta"], mid=c["media"], low=c["baja"])
+
+    parts = [intro_text]
     if c.get("listo_para_merge"):
         parts[-1] += t["ready_count"].format(n=c["listo_para_merge"])
 
@@ -188,5 +235,7 @@ def build_summary(repo: str, ranked: list[PrioritizedPR], lang: str = "es", spok
         )
     if len(ranked) > len(top):
         parts.append(t["rest"].format(n=len(ranked) - len(top)))
-    parts.append(t["outro"])
+
+    outro_text = custom["outro"] if custom else t["outro"]
+    parts.append(outro_text)
     return " ".join(parts)

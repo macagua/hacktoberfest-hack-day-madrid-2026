@@ -58,7 +58,14 @@ async def standup(
         raise HTTPException(status_code=exc.status_code, detail=exc.message) from exc
 
     ranked = prioritize(prs, body.lang)
-    summary = build_summary(body.repo, ranked, body.lang, body.spoken_top)
+    summary = build_summary(
+        body.repo,
+        ranked,
+        body.lang,
+        body.spoken_top,
+        tone=body.tone,
+        format_style=body.format,
+    )
 
     response = StandupResponse(
         repo=body.repo,
