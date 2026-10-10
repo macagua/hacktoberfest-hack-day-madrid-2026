@@ -4,14 +4,15 @@ import base64
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 
-from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 
 from .config import Settings, get_settings
 from .github import GitHubClient, GitHubError
 from .priority import build_summary, counts, prioritize
-from .schemas import StandupRequest, StandupResponse
-from .voice import VoiceError, mime_for, synthesize
+from .schemas import StandupRequest, StandupResponse, TTSRequest
+from .voice import VoiceError, mime_for, synthesize, transcribe
 
 
 @asynccontextmanager
@@ -35,6 +36,30 @@ app.add_middleware(
 
 def get_github(request: Request) -> GitHubClient:
     return GitHubClient(request.app.state.http)
+
+
+@app.post("/tts")
+async def tts(body: TTSRequest, settings: Settings = Depends(get_settings)) -> Response:
+    try:
+        audio = await synthesize(body.text, settings, voice_id_override=body.voice_id)
+    except VoiceError as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
+    return Response(content=audio, media_type=mime_for(settings.elevenlabs_output_format))
+
+
+@app.post("/stt")
+async def stt(file: UploadFile = File(...), settings: Settings = Depends(get_settings)) -> dict:
+    audio_bytes = await file.read()
+    try:
+        text = await transcribe(
+            audio_bytes,
+            file.filename or "audio",
+            file.content_type or "audio/mpeg",
+            settings,
+        )
+    except VoiceError as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
+    return {"text": text}
 
 
 @app.get("/health")

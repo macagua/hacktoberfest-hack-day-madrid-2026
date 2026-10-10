@@ -8,6 +8,11 @@ from pydantic import BaseModel, Field, field_validator
 _REPO_RE = re.compile(r"^(?:https?://github\.com/)?([\w.-]+)/([\w.-]+?)(?:\.git)?/?$")
 
 
+class TTSRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=2500)
+    voice_id: str | None = None
+
+
 class StandupRequest(BaseModel):
     repo: str = Field(
         ...,
