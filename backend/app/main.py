@@ -13,6 +13,7 @@ from .github import GitHubClient, GitHubError
 from .priority import build_summary, counts, prioritize
 from .schemas import StandupRequest, StandupResponse, TTSRequest
 from .voice import VoiceError, mime_for, synthesize, transcribe
+from .voice_router import router as voice_router
 
 
 @asynccontextmanager
@@ -26,6 +27,7 @@ async def lifespan(app: FastAPI):
 
 settings_at_import = get_settings()
 app = FastAPI(title="PR Stand-up", version="0.1.0", lifespan=lifespan)
+app.include_router(voice_router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings_at_import.cors_origins,

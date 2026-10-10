@@ -31,6 +31,10 @@ class Settings:
     elevenlabs_model_id: str = field(default_factory=lambda: os.getenv("ELEVENLABS_MODEL_ID", "eleven_multilingual_v2"))
     elevenlabs_output_format: str = field(default_factory=lambda: os.getenv("ELEVENLABS_OUTPUT_FORMAT", "mp3_44100_128"))
 
+    gemma_base_url: str = field(default_factory=lambda: os.getenv("GEMMA_BASE_URL", "https://bubbly-vermilion.netbird.apps.buildinmadrid.dev/v1"))
+    gemma_model_id: str = field(default_factory=lambda: os.getenv("GEMMA_MODEL_ID", "gemma-4-26b-a4b"))
+    gemma_api_key: str | None = field(default_factory=lambda: os.getenv("GEMMA_API_KEY") or None)
+
     cors_origins: list[str] = field(
         default_factory=lambda: [
             o.strip()
