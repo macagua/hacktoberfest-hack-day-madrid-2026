@@ -1,0 +1,24 @@
+[project]
+name = "pr-standup-backend"
+version = "0.1.0"
+description = "Lee las PRs abiertas de un repo, las prioriza, las resume y lo cuenta en voz alta con ElevenLabs"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi[standard]>=0.143,<1",
+    "httpx>=0.28,<1",
+    "elevenlabs>=2.71,<3",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9",
+]
+
+[tool.uv]
+# Es una aplicación, no una librería: no hace falta empaquetarla.
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
