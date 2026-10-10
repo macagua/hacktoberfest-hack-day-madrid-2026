@@ -30,35 +30,35 @@ Revisar el backlog de Pull Requests suele ser una tarea repetitiva y tediosa. **
 
 ```mermaid
 flowchart TD
-    subgraph Frontend ["🎙️ Frontend (Standup FM Studio - React 19 + Vite)"]
-        UI["UI / Dial 104.3 FM"]
-        AudioPlayer["Reproductor de Audio & Descarga MP3"]
-        PRDeck["Tarjetas de PRs Priorizadas & Explicación"]
+    subgraph Frontend [Frontend: Standup FM Studio - React 19 y Vite]
+        UI[UI: Dial 104.3 FM]
+        AudioPlayer[Reproductor de Audio y Descarga MP3]
+        PRDeck[Tarjetas de PRs Priorizadas]
     end
 
-    subgraph Backend ["⚡ Backend (FastAPI + Async HTTP)"]
-        API["FastAPI App (/standup, /tts, /stt, /health)"]
-        ScoringEngine["Motor de Priorización & Reglas"]
-        SummaryBuilder["Generador de Resúmenes & Guiones"]
+    subgraph Backend [Backend: FastAPI y Python]
+        API[FastAPI App: standup, tts, stt, health]
+        ScoringEngine[Motor de Priorizacion y Reglas]
+        SummaryBuilder[Generador de Resumenes y Guiones]
     end
 
-    subgraph External ["🌐 Servicios Externos & Modelos de IA"]
-        GH["GitHub API v3 & GraphQL v4"]
-        Gemma["Google Gemma 4 (Speech Synthesizer & NLP)"]
-        Eleven["ElevenLabs (Scribe STT & Turbo v2.5 TTS)"]
+    subgraph External [Servicios Externos y Modelos de IA]
+        GH[GitHub API v3 y GraphQL v4]
+        Gemma[Google Gemma 4: Speech Synthesizer]
+        Eleven[ElevenLabs: Scribe STT y Turbo v2.5 TTS]
     end
 
-    UI -->|1. Solicita Standup (repo, lang, tono)| API
-    API -->|2. Obtiene PRs abiertas y Checks| GH
-    GH -->|3. Payload JSON de PRs| API
-    API -->|4. Calcula puntuación y causas| ScoringEngine
-    ScoringEngine -->|5. PRs ordenadas por severidad| SummaryBuilder
-    SummaryBuilder -.->|6. Opcional: Guion conversacional| Gemma
-    SummaryBuilder -->|7. Guion de locución| Eleven
-    Eleven -->|8. Audio MP3 en streaming / base64| API
-    API -->|9. Respuesta JSON + Audio| Frontend
-    Frontend --> AudioPlayer
-    Frontend --> PRDeck
+    UI -->|"1. Solicita Standup con repo y opciones"| API
+    API -->|"2. Obtiene PRs abiertas y Checks"| GH
+    GH -->|"3. Payload JSON de PRs"| API
+    API -->|"4. Calcula puntuacion y causas"| ScoringEngine
+    ScoringEngine -->|"5. PRs ordenadas por severidad"| SummaryBuilder
+    SummaryBuilder -.->|"6. Opcional: Guion conversacional"| Gemma
+    SummaryBuilder -->|"7. Guion de locucion"| Eleven
+    Eleven -->|"8. Audio MP3 en streaming o base64"| API
+    API -->|"9. Respuesta JSON y Audio"| UI
+    UI --> AudioPlayer
+    UI --> PRDeck
 ```
 
 ---
@@ -99,7 +99,7 @@ Cada Pull Request recibe una puntuación determinista calculada en [`backend/app
 | **Borrador (Draft PR)** | **-40** | En trabajo activo, no lista para mezclar |
 
 ### Niveles y Estados
-* **Nivel:** Alta ($\ge 45$), Media ($\ge 20$), Baja ($< 20$).
+* **Nivel:** Alta (≥ 45 pts), Media (≥ 20 pts), Baja (< 20 pts).
 * **Estado:** `listo_para_merge`, `necesita_revision`, `cambios_solicitados`, `ci_fallando`, `conflictos`, `borrador`, `en_curso`.
 
 ---
