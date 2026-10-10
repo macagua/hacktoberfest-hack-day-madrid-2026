@@ -84,6 +84,8 @@ export const es = {
       forward: 'Adelantar {{seconds}} segundos',
     },
     script: 'Guion',
+    copyScript: 'Copiar guion',
+    copiedScript: '¡Copiado!',
     error: {
       title: 'Se nos cortó la transmisión',
       text: 'GitHub o las voces no contestaron. No es tu culpa (esta vez). Tus opciones siguen como las dejaste.',

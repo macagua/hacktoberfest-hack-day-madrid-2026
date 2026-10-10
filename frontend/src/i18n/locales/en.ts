@@ -84,6 +84,8 @@ export const en: Translation = {
       forward: 'Forward {{seconds}} seconds',
     },
     script: 'Script',
+    copyScript: 'Copy script',
+    copiedScript: 'Copied!',
     error: {
       title: 'We lost the signal',
       text: 'GitHub or the voices didn’t answer. Not your fault (this time). Your options are just as you left them.',

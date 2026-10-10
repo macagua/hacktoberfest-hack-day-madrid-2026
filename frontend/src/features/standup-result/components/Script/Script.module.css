@@ -4,6 +4,12 @@
   gap: 16px;
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .heading {
   margin: 0;
   font-family: var(--font-mono);
@@ -12,6 +18,23 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--color-text-2);
+}
+
+.copyButton {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-text-2);
+  background: var(--color-panel-raised);
+  border: 1px solid var(--color-panel-border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.copyButton:hover {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
 }
 
 .lines {
