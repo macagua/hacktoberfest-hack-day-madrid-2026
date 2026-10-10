@@ -7,7 +7,14 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-# edita .env y pon tu ELEVENLABS_API_KEY
+```
+
+# Actualiza el archivo .env
+
+Actualiza el archivo .env y pon tu ELEVENLABS_API_KEY
+
+```bash
+nano .env
 ```
 
 ## Ejecutar
@@ -40,7 +47,7 @@ curl localhost:8000/health
 ```bash
 curl -X POST localhost:8000/tts \
   -H "Content-Type: application/json" \
-  -d '{"text":"Hola, esto es una prueba LEO."}' \
+  -d '{"text":"Hola, esto es una prueba."}' \
   -o salida.mp3
 ```
 
